@@ -140,6 +140,16 @@ function configure_keystone() {
     iniset $KEYSTONE_CONF DEFAULT public_endpoint "$KEYSTONE_SERVICE_PROTOCOL://$KEYSTONE_SERVICE_HOST:%(public_port)s/"
     iniset $KEYSTONE_CONF DEFAULT admin_endpoint "$KEYSTONE_SERVICE_PROTOCOL://$KEYSTONE_SERVICE_HOST:%(admin_port)s/"
 
+    # Register SSL certificates if provided
+    if [ $KEYSTONE_SSL_CERT ]; then
+        iniset $KEYSTONE_CONF ssl enable True
+        iniset $KEYSTONE_CONF ssl certfile $KEYSTONE_SSL_CERT
+    fi
+    if [ $KEYSTONE_SSL_KEY ]; then
+        iniset $KEYSTONE_CONF ssl enable True
+        iniset $KEYSTONE_CONF ssl keyfile $KEYSTONE_SSL_KEY
+    fi
+
     if is_service_enabled tls-proxy; then
         # Set the service ports for a proxy to take the originals
         iniset $KEYSTONE_CONF DEFAULT public_port $KEYSTONE_SERVICE_PORT_INT
