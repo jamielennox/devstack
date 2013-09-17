@@ -319,6 +319,7 @@ for service in $SSL_ENABLED_SERVICES; do
     key_var="${service}_SSL_KEY"
     ca_var="${service}_SSL_CA"
     protocol_var="${service}_SERVICE_PROTOCOL"
+    enabled_var="${service}_SSL_ENABLED"
 
     cert=${!cert_var}
     key=${!key_var}
@@ -326,8 +327,9 @@ for service in $SSL_ENABLED_SERVICES; do
 
     if [[ $cert && $key && $ca ]]; then
         declare $protocol_var="https"
+        declare $enabled_var=1
 
-        if [ $service = "KEYSTONE" ]; then
+        if [[ $service = "KEYSTONE" ]]; then
             KEYSTONE_AUTH_PROTOCOL="https"
         fi
     else
@@ -340,6 +342,7 @@ for service in $SSL_ENABLED_SERVICES; do
             unset $key_var
             unset $ca_var
         fi
+        declare $enabled_var=0
     fi
 done
 
