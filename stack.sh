@@ -313,6 +313,7 @@ SERVICE_TIMEOUT=${SERVICE_TIMEOUT:-60}
 # eg KEYSTONE_SSL_ENABLED variable.
 
 SSL_ENABLED_SERVICES="KEYSTONE"
+rm -f $DATA_DIR/ca-bundle.pem
 
 for service in $SSL_ENABLED_SERVICES; do
     cert_var="${service}_SSL_CERT"
@@ -332,6 +333,8 @@ for service in $SSL_ENABLED_SERVICES; do
         if [[ $service = "KEYSTONE" ]]; then
             KEYSTONE_AUTH_PROTOCOL="https"
         fi
+
+        cat $ca >> $DATA_DIR/ca-bundle.pem
     else
         if [[ $cert || $key || $ca ]]; then
             echo "To enable https for $service you need to provide" \
@@ -346,6 +349,9 @@ for service in $SSL_ENABLED_SERVICES; do
     fi
 done
 
+if [ -f $DATA_DIR/ca-bundle.pem ]; then
+    export OS_CACERT=$DATA_DIR/ca-bundle.pem
+fi
 
 # Configure Projects
 # ==================
@@ -1391,7 +1397,8 @@ fi
 CURRENT_RUN_TIME=$(date "+$TIMESTAMP_FORMAT")
 echo "# $CURRENT_RUN_TIME" >$TOP_DIR/.stackenv
 for i in BASE_SQL_CONN ENABLED_SERVICES HOST_IP LOGFILE \
-  SERVICE_HOST SERVICE_PROTOCOL STACK_USER TLS_IP; do
+  SERVICE_HOST SERVICE_PROTOCOL STACK_USER TLS_IP KEYSTONE_AUTH_PROTOCOL \
+  OS_CACERT; do
     echo $i=${!i} >>$TOP_DIR/.stackenv
 done
 
