@@ -317,8 +317,8 @@ function make_root_CA() {
 # only if all three variables are present for a particular ssl enabled service.
 
 # If only some of these variables are set for a service it is ignored.
-# If present it will override the eg KEYSTONE_SERVICE_PROTOCOL and set the
-# eg KEYSTONE_SSL_ENABLED variable.
+# If present it will override the {name}_SERVICE_PROTOCOL and set the
+# {name}_SSL_ENABLED variable (eg KEYSTONE_SERVICE_PROTOCOL and KEYSTONE_SSL_ENABLED).
 
 function validate_input_certificates() {
     local service=$1
