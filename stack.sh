@@ -313,7 +313,8 @@ SERVICE_TIMEOUT=${SERVICE_TIMEOUT:-60}
 # eg KEYSTONE_SSL_ENABLED variable.
 
 SSL_ENABLED_SERVICES="KEYSTONE"
-rm -f $DATA_DIR/ca-bundle.pem
+SSL_BUNDLE_FILE="$DATA_DIR/ca-bundle.pem"
+rm -f $SSL_BUNDLE_FILE
 
 for service in $SSL_ENABLED_SERVICES; do
     cert_var="${service}_SSL_CERT"
@@ -334,7 +335,7 @@ for service in $SSL_ENABLED_SERVICES; do
             KEYSTONE_AUTH_PROTOCOL="https"
         fi
 
-        cat $ca >> $DATA_DIR/ca-bundle.pem
+        cat $ca >> $SSL_BUNDLE_FILE
     else
         if [[ $cert || $key || $ca ]]; then
             echo "To enable https for $service you need to provide" \
@@ -349,8 +350,8 @@ for service in $SSL_ENABLED_SERVICES; do
     fi
 done
 
-if [ -f $DATA_DIR/ca-bundle.pem ]; then
-    export OS_CACERT=$DATA_DIR/ca-bundle.pem
+if [ -f $SSL_BUNDLE_FILE ]; then
+    export OS_CACERT=$SSL_BUNDLE_FILE
 fi
 
 # Configure Projects
@@ -1322,7 +1323,13 @@ fi
 # which is helpful in image bundle steps.
 
 if is_service_enabled nova && is_service_enabled key; then
-    $TOP_DIR/tools/create_userrc.sh -PA --target-dir $TOP_DIR/accrc
+    USERRC_PARAMS="-PA --target-dir $TOP_DIR/accrc"
+
+    if [ -f $SSL_BUNDLE_FILE ]; then
+        USERRC_PARAMS="$USERRC_PARAMS --os-cacert $SSL_BUNDLE_FILE"
+    fi
+
+    $TOP_DIR/tools/create_userrc.sh $USERRC_PARAMS
 fi
 
 
