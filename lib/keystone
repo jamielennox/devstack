@@ -77,6 +77,7 @@ KEYSTONE_VALID_ASSIGNMENT_BACKENDS=kvs,ldap,sql
 # Check and load certificate variables
 validate_input_certificates "KEYSTONE"
 
+
 # Functions
 # ---------
 # cleanup_keystone() - Remove residual data files, anything left over from previous
