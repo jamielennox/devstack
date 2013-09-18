@@ -317,8 +317,8 @@ function make_root_CA() {
 # only if all three variables are present for a particular ssl enabled service.
 
 # If only some of these variables are set for a service it is ignored.
-# If present it will override the {name}_SERVICE_PROTOCOL and set the
-# {name}_SSL_ENABLED and {name}_SERVICE_PROTOCOL variables
+# If present it will override the {name}_SERVICE_PROTOCOL, set the
+# {name}_SSL_ENABLED if enabled and set the {name}_SERVICE_PROTOCOL variable
 # (eg KEYSTONE_SERVICE_PROTOCOL, KEYSTONE_SSL_ENABLED and KEYSTONE_SERVICE_PROTOCOL).
 
 function validate_input_certificates() {
@@ -348,7 +348,7 @@ function validate_input_certificates() {
 
             unset $cert_var $key_var $ca_var
         fi
-        declare -g $enabled_var=0
+        unset $enabled_var
         [[ ${!protocol_var} ]] || declare -g $protocol_var=$SERVICE_PROTOCOL
     fi
 }
