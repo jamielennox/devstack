@@ -77,6 +77,7 @@ do
     --os-tenant-id) export OS_TENANT_ID=$2; shift ;;
     --skip-tenant) SKIP_TENANT="$SKIP_TENANT$2,"; shift ;;
     --os-auth-url) export OS_AUTH_URL=$2; shift ;;
+    --os-cacert) export OS_CACERT=$2; shift ;;
     --target-dir) ACCOUNT_DIR=$2; shift ;;
     --debug) set -o xtrace ;;
     -u) MODE=${MODE:-one};  USER_NAME=$2; shift ;;
@@ -186,6 +187,7 @@ export OS_USERNAME="$user_name"
 # Openstack Tenant ID = $tenant_id
 export OS_TENANT_NAME="$tenant_name"
 export OS_AUTH_URL="$OS_AUTH_URL"
+export OS_CACERT="$OS_CACERT"
 export EC2_CERT="$ec2_cert"
 export EC2_PRIVATE_KEY="$ec2_private_key"
 export EC2_USER_ID=42 #not checked by nova (can be a 12-digit id)
