@@ -339,9 +339,7 @@ function validate_input_certificates() {
         declare -g $enabled_var=1
         cat $ca >> $SSL_BUNDLE_FILE
 
-        if [[ $service = "KEYSTONE" ]]; then
-            KEYSTONE_AUTH_PROTOCOL="https"
-        fi
+        [[ $service = "KEYSTONE" ]] && KEYSTONE_AUTH_PROTOCOL="https"
     else
         if [[ $cert || $key || $ca ]]; then
             echo "To enable https for $service you need to provide" \
@@ -351,6 +349,7 @@ function validate_input_certificates() {
             unset $cert_var $key_var $ca_var
         fi
         declare -g $enabled_var=0
+        [[ ${!protocol_var} ]] || declare -g $protocol_var=$SERVICE_PROTOCOL
     fi
 }
 
