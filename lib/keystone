@@ -75,6 +75,7 @@ KEYSTONE_VALID_IDENTITY_BACKENDS=kvs,ldap,pam,sql
 # valid assignment backends as per dir keystone/identity/backends
 KEYSTONE_VALID_ASSIGNMENT_BACKENDS=kvs,ldap,sql
 
+# Check provided certificates
 validate_input_certificates "KEYSTONE"
 
 # Functions

@@ -334,8 +334,8 @@ function validate_input_certificates() {
     local ca=${!ca_var}
 
     if [[ $cert && $key && $ca ]]; then
-        declare $protocol_var="https"
-        declare $enabled_var=1
+        declare -g $protocol_var="https"
+        declare -g $enabled_var=1
 
         if [[ $service = "KEYSTONE" ]]; then
             KEYSTONE_AUTH_PROTOCOL="https"
@@ -352,7 +352,7 @@ function validate_input_certificates() {
             unset $key_var
             unset $ca_var
         fi
-        declare $enabled_var=0
+        declare -g $enabled_var=0
     fi
 }
 
