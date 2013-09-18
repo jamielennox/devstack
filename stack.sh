@@ -298,61 +298,10 @@ LOG_COLOR=`trueorfalse True $LOG_COLOR`
 # Service startup timeout
 SERVICE_TIMEOUT=${SERVICE_TIMEOUT:-60}
 
-
-# Certificate Configuration
-# =========================
-
-# Set and do some basic certificate variable validation. To create a HTTPS
-# connection you need to specify a certificate, key and ca certificate. For
-# example for keystone this would be specified as KEYSTONE_SSL_CERT,
-# KEYSTONE_SSL_KEY and KEYSTONE_SSL_CA. A https connection will be created
-# only if all three variables are present for a particular ssl enabled service.
-
-# If only some of these variables are set for a service it is ignored.
-# If present it will override the eg KEYSTONE_SERVICE_PROTOCOL and set the
-# eg KEYSTONE_SSL_ENABLED variable.
-
-SSL_ENABLED_SERVICES="KEYSTONE"
+# Create a bundle from input CA certificates
 SSL_BUNDLE_FILE="$DATA_DIR/ca-bundle.pem"
 rm -f $SSL_BUNDLE_FILE
 
-for service in $SSL_ENABLED_SERVICES; do
-    cert_var="${service}_SSL_CERT"
-    key_var="${service}_SSL_KEY"
-    ca_var="${service}_SSL_CA"
-    protocol_var="${service}_SERVICE_PROTOCOL"
-    enabled_var="${service}_SSL_ENABLED"
-
-    cert=${!cert_var}
-    key=${!key_var}
-    ca=${!ca_var}
-
-    if [[ $cert && $key && $ca ]]; then
-        declare $protocol_var="https"
-        declare $enabled_var=1
-
-        if [[ $service = "KEYSTONE" ]]; then
-            KEYSTONE_AUTH_PROTOCOL="https"
-        fi
-
-        cat $ca >> $SSL_BUNDLE_FILE
-    else
-        if [[ $cert || $key || $ca ]]; then
-            echo "To enable https for $service you need to provide" \
-                 "${service}_CERT, ${service}_KEY and ${service}_CA." \
-                 "Only some provided so ignoring."
-
-            unset $cert_var
-            unset $key_var
-            unset $ca_var
-        fi
-        declare $enabled_var=0
-    fi
-done
-
-if [ -f $SSL_BUNDLE_FILE ]; then
-    export OS_CACERT=$SSL_BUNDLE_FILE
-fi
 
 # Configure Projects
 # ==================
@@ -385,6 +334,11 @@ fi
 
 # Set the destination directories for other OpenStack projects
 OPENSTACKCLIENT_DIR=$DEST/python-openstackclient
+
+# If a CA bundle has been created then export it
+if [ -f $SSL_BUNDLE_FILE ]; then
+    export OS_CACERT=$SSL_BUNDLE_FILE
+fi
 
 # Interactive Configuration
 # -------------------------

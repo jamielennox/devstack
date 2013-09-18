@@ -75,6 +75,8 @@ KEYSTONE_VALID_IDENTITY_BACKENDS=kvs,ldap,pam,sql
 # valid assignment backends as per dir keystone/identity/backends
 KEYSTONE_VALID_ASSIGNMENT_BACKENDS=kvs,ldap,sql
 
+validate_input_certificates "KEYSTONE"
+
 # Functions
 # ---------
 # cleanup_keystone() - Remove residual data files, anything left over from previous
