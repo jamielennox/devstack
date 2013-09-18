@@ -40,6 +40,7 @@ Optional Arguments
 --os-tenant-name <tenant_name>
 --os-tenant-id <tenant_id>
 --os-auth-url <auth_url>
+--os-cacert <cert file>
 --target-dir <target_directory>
 --skip-tenant <tenant-name>
 --debug
@@ -50,7 +51,7 @@ $0 -P -C mytenant -u myuser -p mypass
 EOF
 }
 
-if ! options=$(getopt -o hPAp:u:r:C: -l os-username:,os-password:,os-tenant-name:,os-tenant-id:,os-auth-url:,target-dir:,skip-tenant:,help,debug -- "$@")
+if ! options=$(getopt -o hPAp:u:r:C: -l os-username:,os-password:,os-tenant-name:,os-tenant-id:,os-auth-url:,target-dir:,skip-tenant:,os-cacert:,help,debug -- "$@")
 then
     #parse error
     display_help
