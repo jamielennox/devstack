@@ -148,7 +148,6 @@ function configure_keystone() {
         iniset $KEYSTONE_CONF ssl enable True
         iniset $KEYSTONE_CONF ssl certfile $KEYSTONE_SSL_CERT
         iniset $KEYSTONE_CONF ssl keyfile $KEYSTONE_SSL_KEY
-        iniset $KEYSTONE_CONF ssl cafile $KEYSTONE_SSL_CA
     fi
 
     if is_service_enabled tls-proxy; then

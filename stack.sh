@@ -298,7 +298,7 @@ LOG_COLOR=`trueorfalse True $LOG_COLOR`
 # Service startup timeout
 SERVICE_TIMEOUT=${SERVICE_TIMEOUT:-60}
 
-# Create a bundle from input CA certificates
+# Reset the bundle of CA certificates
 SSL_BUNDLE_FILE="$DATA_DIR/ca-bundle.pem"
 rm -f $SSL_BUNDLE_FILE
 
