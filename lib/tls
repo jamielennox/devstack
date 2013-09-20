@@ -352,6 +352,8 @@ function ensure_certificates() {
         cat $ca >> $SSL_BUNDLE_FILE
     else
         if [[ ! $CERT_GEN_INITIALIZED ]]; then
+            rm -rf $INT_CA_DIR
+            rm -rf $ROOT_CA_DIR
             init_CA
             cat $INT_CA_DIR/ca-chain.pem >> $SSL_BUNDLE_FILE
             CERT_GEN_INITIALIZED=1
