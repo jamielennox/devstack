@@ -18,7 +18,10 @@
 # make_root_ca
 # make_int_ca
 # new_cert $INT_CA_DIR int-server "abc"
-# validate_input_certificates
+
+# is_ssl_enabled_service
+# ensure_certificates
+
 # start_tls_proxy HOST_IP 5000 localhost 5000
 
 
