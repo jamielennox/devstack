@@ -334,7 +334,7 @@ function validate_input_certificates() {
     local service=$2
     local protocol_var="${service}_SERVICE_PROTOCOL"
 
-    if [[ ! is_ssl_enabled_service $name ]]; then
+    if ! is_ssl_enabled_service $name; then
         # if it's not ssl enabled then default to the SERVICE_PROTOCOL
         [[ ${!protocol_var} ]] || declare -g $protocol_var=$SERVICE_PROTOCOL
         return 0
