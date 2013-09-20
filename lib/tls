@@ -310,6 +310,12 @@ function make_root_CA() {
 # Certificate Input Configuration
 # ===============================
 
+# check to see if the service(s) specified are to be SSL enabled.
+#
+# Multiple services specified as arguments are ``OR``'ed together; the test
+# is a short-circuit boolean, i.e it returns on the first match.
+#
+# Uses global ``SSL_ENABLED_SERVICES``
 function is_ssl_enabled_service() {
     services=$@
     for service in ${services}; do
@@ -319,8 +325,17 @@ function is_ssl_enabled_service() {
 }
 
 
+# Ensure that the certificates for a service are in place. This function does
+# not check that a service is SSL enabled, this should already have been
+# completed.
+#
+# The function expects to find a certificate, key and CA certificate in the
+# variables {service}_SSL_CERT, {service}_SSL_KEY and {service}_SSL_CA. For
+# example for keystone this would be KEYSTONE_SSL_CERT, KEYSTONE_SSL_KEY and
+# KEYSTONE_SSL_CA. If it does not find these certificates the program will
+# quit.
 function ensure_certificates() {
-   local service=$1
+    local service=$1
 
     local cert_var="${service}_SSL_CERT"
     local key_var="${service}_SSL_KEY"
@@ -337,87 +352,6 @@ function ensure_certificates() {
 
     # [[ $ca ]] && ! grep -Fxqf $ca $SSL_BUNDLE_FILE && cat $ca >> $SSL_BUNDLE_FILE
     cat $ca >> $SSL_BUNDLE_FILE
-}
-
-function certificate_env_variables() {
-
-    local service=$1
-    local identifier=$2
-
-    if is_ssl_enabled_service $service; then
-        local cert_var="${identifier}_SSL_CERT"
-        local key_var="${identifier}_SSL_KEY"
-        local ca_var="${identifier}_SSL_CA"
-
-        local cert=${!cert_var}
-        local key=${!key_var}
-        local ca=${!ca_var}
-
-        if [[ $cert && $key && $ca ]]; then
-            declare -g $protocol_var="https"
-            cat $ca >> $SSL_BUNDLE_FILE
-        else
-            die $LINENO  "To enable https for ${service} you need to provide" \
-                         "${identifier}_SSL_CERT, ${identifier}_SSL_KEY and" \
-                         "${identifier}_SSL_CA."
-        fi
-    else
-        # In reality this will almost always just set protocol_var to http
-        [[ ${!protocol_var} ]] || declare -g $protocol_var=$SERVICE_PROTOCOL
-    fi
-
-    [[ "$identifier" = "KEYSTONE" ]] && KEYSTONE_AUTH_PROTOCOL=${!protocol_var}
-}
-
-
-# Set and do some basic certificate variable validation. To create a HTTPS
-# connection you need to specify a certificate, key and ca certificate. For
-# example for keystone this would be specified as KEYSTONE_SSL_CERT,
-# KEYSTONE_SSL_KEY and KEYSTONE_SSL_CA. A https connection will be created
-# only if all three variables are present for a particular ssl enabled service.
-
-# If only some of these variables are set for a service it is ignored.
-# If present it will override the {name}_SERVICE_PROTOCOL, set the
-# {name}_SSL_ENABLED if enabled and set the {name}_SERVICE_PROTOCOL variable
-# (eg KEYSTONE_SERVICE_PROTOCOL, KEYSTONE_SSL_ENABLED and KEYSTONE_SERVICE_PROTOCOL).
-
-function validate_input_certificates() {
-    local name=$1
-    local service=$2
-    local protocol_var="${service}_SERVICE_PROTOCOL"
-
-    if ! is_ssl_enabled_service $name; then
-        # if it's not ssl enabled then default to the SERVICE_PROTOCOL
-        [[ ${!protocol_var} ]] || declare -g $protocol_var=$SERVICE_PROTOCOL
-        return 0
-    fi
-
-    local cert_var="${service}_SSL_CERT"
-    local key_var="${service}_SSL_KEY"
-    local ca_var="${service}_SSL_CA"
-    local enabled_var="${service}_SSL_ENABLED"
-
-    local cert=${!cert_var}
-    local key=${!key_var}
-    local ca=${!ca_var}
-
-    if [[ $cert && $key && $ca ]]; then
-        declare -g $protocol_var="https"
-        declare -g $enabled_var=1
-        cat $ca >> $SSL_BUNDLE_FILE
-
-        [[ $service = "KEYSTONE" ]] && KEYSTONE_AUTH_PROTOCOL="https"
-    else
-        if [[ $cert || $key || $ca ]]; then
-            echo "To enable https for $service you need to provide" \
-                 "${service}_SSL_CERT, ${service}_SSL_KEY and" \
-                 "${service}_SSL_CA. Only some provided so ignoring."
-
-            unset $cert_var $key_var $ca_var
-        fi
-        unset $enabled_var
-        [[ ${!protocol_var} ]] || declare -g $protocol_var=$SERVICE_PROTOCOL
-    fi
 }
 
 
