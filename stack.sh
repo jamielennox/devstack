@@ -798,6 +798,17 @@ fi
 restart_rpc_backend
 
 
+# Export Certicate Authority Bundle
+# ---------------------------------
+
+# If certificates were used and written to the SSL bundle file then these
+# should be exported so clients can validate their connections.
+
+if [ -f $SSL_BUNDLE_FILE ]; then
+    export OS_CACERT=$SSL_BUNDLE_FILE
+fi
+
+
 # Configure database
 # ------------------
 
@@ -1262,17 +1273,6 @@ if is_service_enabled trove; then
     # Start the trove API and trove taskmgr components
     echo_summary "Starting Trove"
     start_trove
-fi
-
-
-# Export Certicate Authority Bundle
-# =================================
-
-# If certificates were used and written to the SSL bundle file then these
-# should be exported so clients can validate their connections.
-
-if [ -f $SSL_BUNDLE_FILE ]; then
-    export OS_CACERT=$SSL_BUNDLE_FILE
 fi
 
 
