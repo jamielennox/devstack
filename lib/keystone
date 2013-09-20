@@ -64,6 +64,7 @@ KEYSTONE_AUTH_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-$SERVICE_PROTOCOL}
 KEYSTONE_SERVICE_HOST=${KEYSTONE_SERVICE_HOST:-$SERVICE_HOST}
 KEYSTONE_SERVICE_PORT=${KEYSTONE_SERVICE_PORT:-5000}
 KEYSTONE_SERVICE_PORT_INT=${KEYSTONE_SERVICE_PORT_INT:-5001}
+KEYSTONE_SERVICE_PROTOCOL=${KEYSTONE_SERVICE_RPTOCOL:-$SERVICE_PROTOCOL}
 
 # Set the tenant for service accounts in Keystone
 SERVICE_TENANT_NAME=${SERVICE_TENANT_NAME:-service}
@@ -74,9 +75,11 @@ KEYSTONE_VALID_IDENTITY_BACKENDS=kvs,ldap,pam,sql
 # valid assignment backends as per dir keystone/identity/backends
 KEYSTONE_VALID_ASSIGNMENT_BACKENDS=kvs,ldap,sql
 
-# Check and load certificate variables
-validate_input_certificates "key" "KEYSTONE"
-
+# if we are running with SSL use https protocols
+if is_ssl_enabled_service "key"; then
+    KEYSTONE_AUTH_PROTOCOL="https"
+    KEYSTONE_SERVICE_PROTOCOL="https"
+fi
 
 # Functions
 # ---------
@@ -145,6 +148,8 @@ function configure_keystone() {
 
     # Register SSL certificates if provided
     if is_ssl_enabled_service keystone; then
+        ensure_certificates "KEYSTONE"
+
         iniset $KEYSTONE_CONF ssl enable True
         iniset $KEYSTONE_CONF ssl certfile $KEYSTONE_SSL_CERT
         iniset $KEYSTONE_CONF ssl keyfile $KEYSTONE_SSL_KEY
