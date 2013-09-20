@@ -335,11 +335,6 @@ fi
 # Set the destination directories for other OpenStack projects
 OPENSTACKCLIENT_DIR=$DEST/python-openstackclient
 
-# If a CA bundle has been created then export it
-if [ -f $SSL_BUNDLE_FILE ]; then
-    export OS_CACERT=$SSL_BUNDLE_FILE
-fi
-
 # Interactive Configuration
 # -------------------------
 
@@ -1268,6 +1263,18 @@ if is_service_enabled trove; then
     echo_summary "Starting Trove"
     start_trove
 fi
+
+
+# Export Certicate Authority Bundle
+# =================================
+
+# If certificates were used and written to the SSL bundle file then these
+# should be exported so clients can validate their connections.
+
+if [ -f $SSL_BUNDLE_FILE ]; then
+    export OS_CACERT=$SSL_BUNDLE_FILE
+fi
+
 
 # Create account rc files
 # =======================
