@@ -561,6 +561,7 @@ source $TOP_DIR/lib/infra
 source $TOP_DIR/lib/oslo
 source $TOP_DIR/lib/stackforge
 source $TOP_DIR/lib/horizon
+source $TOP_DIR/lib/kite
 source $TOP_DIR/lib/keystone
 source $TOP_DIR/lib/glance
 source $TOP_DIR/lib/nova
@@ -790,6 +791,12 @@ install_keystonemiddleware
 git_clone $OPENSTACKCLIENT_REPO $OPENSTACKCLIENT_DIR $OPENSTACKCLIENT_BRANCH
 setup_develop $OPENSTACKCLIENT_DIR
 
+if is_service_enabled kite; then
+    install_kite
+    configure_kite
+    install_kiteclient
+fi
+
 if is_service_enabled key; then
     if [ "$KEYSTONE_AUTH_HOST" == "$SERVICE_HOST" ]; then
         install_keystone
@@ -983,6 +990,15 @@ start_dstat
 # Start Services
 # ==============
 
+# Kite
+# ----
+
+if is_service_enabled kite; then
+    echo_summary "Starting Kite"
+    init_kite
+    start_kite
+fi
+
 # Keystone
 # --------
 
@@ -1012,6 +1028,10 @@ if is_service_enabled key; then
     create_glance_accounts
     create_cinder_accounts
     create_neutron_accounts
+
+    if is_service_enabled kite; then
+        create_kite_accounts
+    fi
 
     if is_service_enabled ceilometer; then
         create_ceilometer_accounts

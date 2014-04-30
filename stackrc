@@ -53,6 +53,8 @@ if [[ -z "$ENABLED_SERVICES" ]]; then
     ENABLED_SERVICES+=,horizon
     # additional services
     ENABLED_SERVICES+=,rabbit,tempest,mysql
+    # message security
+    ENABLED_SERVICES+=kite
 fi
 
 # SQLAlchemy supports multiple database drivers for each database server
@@ -353,13 +355,24 @@ KEYSTONEMIDDLEWARE_BRANCH=${KEYSTONEMIDDLEWARE_BRANCH:-master}
 SWIFT3_REPO=${SWIFT3_REPO:-${GIT_BASE}/stackforge/swift3.git}
 SWIFT3_BRANCH=${SWIFT3_BRANCH:-master}
 
+# Key distribution server for secure messaging
+# KITE_REPO=${KITE_REPO:-${GIT_BASE}/stackforge/kite.git}
+# KITE_BRANCH=${KITE_BRANCH:-master}
+
+KITE_REPO=https://github.com/jamielennox/kite.git
+KITE_BRANCH=work
+
+# KITECLIENT_REPO=${KITECLIENT_REPO:-${GIT_BASE}/stackforge/python-kiteclient.git}
+# KITECLIENT_BRANCH=${KITE_BRANCH:-master}
+
+KITECLIENT_REPO=https://github.com/jamielennox/python-kiteclient.git
+KITECLIENT_BRANCH=testing
 
 ##################
 #
 #  TripleO Components
 #
 ##################
-
 # diskimage-builder
 DIB_REPO=${DIB_REPO:-${GIT_BASE}/openstack/diskimage-builder.git}
 DIB_BRANCH=${DIB_BRANCH:-master}

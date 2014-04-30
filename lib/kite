@@ -1,0 +1,120 @@
+# lib/kite
+# Functions to control the configuration and operation of **Kite**
+
+# ``stack.sh`` calls the entry points in this order:
+#
+# - install_kiteclient
+# - install_kite
+# - configure_kite
+# - init_kite
+# - start_kite
+# - create_kite_accounts
+# - stop_kite
+# - cleanup_kite
+
+
+# Save trace setting
+XTRACE=$(set +o | grep xtrace)
+set +o xtrace
+
+# Defaults
+# --------
+
+# Set up default directories
+KITE_DIR=$DEST/kite
+KITE_CONF_DIR=${KITE_CONF_DIR:-/etc/kite}
+KITE_CONF=$KITE_CONF_DIR/kite.conf
+
+KITE_SERVICE_HOST=${KITE_SERVICE_HOST:-$SERVICE_HOST}
+KITE_SERVICE_PORT=${KITE_SERVICE_PORT:-9109}
+KITE_SERVICE_PROTOCOL=${KITE_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
+
+# Support potential entry-points console scripts
+KITE_BIN_DIR=$(get_python_exec_prefix)
+
+KITECLIENT_DIR=$DEST/python-kiteclient
+
+# Functions
+# ---------
+# cleanup_kite() - Remove residual data files, anything left over from previous
+# runs that a clean run would need to clean up
+function cleanup_kite {
+    # kill instances (nova)
+    # delete image files (glance)
+    # This function intentionally left blank
+    :
+}
+
+# install_kiteclient() - Collect source and prepare
+function install_kiteclient {
+    git_clone $KITECLIENT_REPO $KITECLIENT_DIR $KITECLIENT_BRANCH
+    setup_develop $KITECLIENT_DIR
+}
+
+# install_kite() - Collect source and prepare
+function install_kite {
+    git_clone $KITE_REPO $KITE_DIR $KITE_BRANCH
+    setup_develop $KITE_DIR
+}
+
+# configure_kite() - Set config files, create data dirs, etc
+function configure_kite {
+    if [[ ! -d $KITE_CONF_DIR ]]; then
+        sudo mkdir -p $KITE_CONF_DIR
+    fi
+    sudo chown $STACK_USER $KITE_CONF_DIR
+
+    if [[ "$KITE_CONF_DIR" != "$KITE_DIR/etc" ]]; then
+        cp -p $KITE_DIR/etc/kite.conf.sample $KITE_CONF
+        chmod 600 $KITE_CONF
+    fi
+
+    iniset $KITE_CONF database connection `database_connection_url kite`
+}
+
+# init_kite() - Initialize databases, etc.
+function init_kite {
+    recreate_database kite utf8
+    $KITE_BIN_DIR/kite-manage db_upgrade
+}
+
+function create_kite_accounts { 
+    KITE_SERVICE=$(openstack service create \
+        kite \
+        --type kds \
+        --description "Messaging Key Distribution Service" \
+        | grep " id " | get_field 2)
+
+    openstack endpoint create \
+        $KITE_SERVICE \
+        --region RegionOne \
+        --publicurl "$KITE_SERVICE_PROTOCOL://$KITE_SERVICE_HOST:$KITE_SERVICE_PORT/v1" \
+        --adminurl "$KITE_SERVICE_PROTOCOL://$KITE_SERVICE_HOST:$KITE_SERVICE_PORT/v1" \
+        --privateurl "$KITE_SERVICE_PROTOCOL://$KITE_SERVICE_HOST:$KITE_SERVICE_PORT/v1"
+}
+  
+# start_kite() - Start running processes, including screen
+function start_kite {
+    screen_it kite "cd ; kite-api --config-file $KITE_CONF --debug"
+
+    echo "Waiting for kite to start..."
+
+    if ! timeout $SERVICE_TIMEOUT sh -c "while ! curl --noproxy '*' -k -s http://$KITE_SERVICE_HOST:$KITE_SERVICE_PORT/ >/dev/null; do sleep 1; done"; then
+        die $LINENO "kite did not start"
+    fi
+}
+
+# stop_kite() - Stop running processes
+function stop_kite {
+    # Kill the Kite screen window
+    screen_stop kite
+}
+
+
+# Restore xtrace
+$XTRACE
+
+# Tell emacs to use shell-script-mode
+## Local variables:
+## mode: shell-script
+## End:
