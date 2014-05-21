@@ -289,6 +289,20 @@ function configure_keystone {
         # Configure ``keystone.conf`` to use templates
         iniset $KEYSTONE_CONF catalog driver "keystone.catalog.backends.templated.Catalog"
         iniset $KEYSTONE_CONF catalog template_file "$KEYSTONE_CATALOG"
+
+    fi
+
+    # encrypted messaging setup
+    if is_service_enabled kite; then
+        SENDER=keystone
+        RESPONSE=$(openstack --os-url $KITE_URL --os-token $ADMIN_PASSWORD key set $SENDER)
+        SENDER=$SENDER:$(echo "$RESPONSE" | grep -i generation | get_field 2)
+        KEY=$(echo "$RESPONSE" | grep -i key | get_field 2)
+
+        iniset $KEYSTONE_CONF DEFAULT kds_url "$KITE_URL"
+        iniset $KEYSTONE_CONF DEFAULT kds_sender "$SENDER"
+        iniset $KEYSTONE_CONF DEFAULT kds_key "$KEY"
+        iniset $KEYSTONE_CONF DEFAULT rpc_protocol 'kitev1'
     fi
 
     # Set up logging

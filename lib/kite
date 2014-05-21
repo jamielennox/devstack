@@ -29,6 +29,8 @@ KITE_SERVICE_HOST=${KITE_SERVICE_HOST:-$SERVICE_HOST}
 KITE_SERVICE_PORT=${KITE_SERVICE_PORT:-9109}
 KITE_SERVICE_PROTOCOL=${KITE_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
 
+KITE_URL="$KITE_SERVICE_PROTOCOL://$KITE_SERVICE_HOST:$KITE_SERVICE_PORT/v1"
+
 # Support potential entry-points console scripts
 KITE_BIN_DIR=$(get_python_exec_prefix)
 
@@ -78,7 +80,7 @@ function init_kite {
     $KITE_BIN_DIR/kite-manage db_upgrade
 }
 
-function create_kite_accounts { 
+function create_kite_accounts {
     KITE_SERVICE=$(openstack service create \
         kite \
         --type kds \
@@ -88,11 +90,11 @@ function create_kite_accounts {
     openstack endpoint create \
         $KITE_SERVICE \
         --region RegionOne \
-        --publicurl "$KITE_SERVICE_PROTOCOL://$KITE_SERVICE_HOST:$KITE_SERVICE_PORT/v1" \
-        --adminurl "$KITE_SERVICE_PROTOCOL://$KITE_SERVICE_HOST:$KITE_SERVICE_PORT/v1" \
-        --privateurl "$KITE_SERVICE_PROTOCOL://$KITE_SERVICE_HOST:$KITE_SERVICE_PORT/v1"
+        --publicurl "$KITE_URL"\
+        --adminurl "$KITE_URL" \
+        --internalurl "$KITE_URL"
 }
-  
+
 # start_kite() - Start running processes, including screen
 function start_kite {
     screen_it kite "cd ; kite-api --config-file $KITE_CONF --debug"

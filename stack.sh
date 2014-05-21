@@ -754,6 +754,32 @@ if [[ $TRACK_DEPENDS = True ]]; then
     $DEST/.venv/bin/pip freeze > $DEST/requires-pre-pip
 fi
 
+# Configure screen
+# ----------------
+
+USE_SCREEN=$(trueorfalse True $USE_SCREEN)
+if [[ "$USE_SCREEN" == "True" ]]; then
+    # Create a new named screen to run processes in
+    screen -d -m -S $SCREEN_NAME -t shell -s /bin/bash
+    sleep 1
+
+    # Set a reasonable status bar
+    if [ -z "$SCREEN_HARDSTATUS" ]; then
+        SCREEN_HARDSTATUS='%{= .} %-Lw%{= .}%> %n%f %t*%{= .}%+Lw%< %-=%{g}(%{d}%H/%l%{g})'
+    fi
+    screen -r $SCREEN_NAME -X hardstatus alwayslastline "$SCREEN_HARDSTATUS"
+    screen -r $SCREEN_NAME -X setenv PROMPT_COMMAND /bin/true
+fi
+
+# Clear screen rc file
+SCREENRC=$TOP_DIR/$SCREEN_NAME-screenrc
+if [[ -e $SCREENRC ]]; then
+    rm -f $SCREENRC
+fi
+
+# Initialize the directory for service status check
+init_service_check
+
 # Check Out and Install Source
 # ----------------------------
 
@@ -795,6 +821,11 @@ if is_service_enabled kite; then
     install_kite
     configure_kite
     install_kiteclient
+
+    # kite needs to be started early as it's part of the configuration for other services
+    echo_summary "Starting Kite"
+    init_kite
+    start_kite
 fi
 
 if is_service_enabled key; then
@@ -955,32 +986,6 @@ if is_service_enabled $DATABASE_BACKENDS; then
 fi
 
 
-# Configure screen
-# ----------------
-
-USE_SCREEN=$(trueorfalse True $USE_SCREEN)
-if [[ "$USE_SCREEN" == "True" ]]; then
-    # Create a new named screen to run processes in
-    screen -d -m -S $SCREEN_NAME -t shell -s /bin/bash
-    sleep 1
-
-    # Set a reasonable status bar
-    if [ -z "$SCREEN_HARDSTATUS" ]; then
-        SCREEN_HARDSTATUS='%{= .} %-Lw%{= .}%> %n%f %t*%{= .}%+Lw%< %-=%{g}(%{d}%H/%l%{g})'
-    fi
-    screen -r $SCREEN_NAME -X hardstatus alwayslastline "$SCREEN_HARDSTATUS"
-    screen -r $SCREEN_NAME -X setenv PROMPT_COMMAND /bin/true
-fi
-
-# Clear screen rc file
-SCREENRC=$TOP_DIR/$SCREEN_NAME-screenrc
-if [[ -e $SCREENRC ]]; then
-    rm -f $SCREENRC
-fi
-
-# Initialize the directory for service status check
-init_service_check
-
 # Dstat
 # -------
 
@@ -989,15 +994,6 @@ start_dstat
 
 # Start Services
 # ==============
-
-# Kite
-# ----
-
-if is_service_enabled kite; then
-    echo_summary "Starting Kite"
-    init_kite
-    start_kite
-fi
 
 # Keystone
 # --------
