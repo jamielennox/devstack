@@ -211,12 +211,20 @@ function configure_cinder {
     inicomment $CINDER_API_PASTE_INI filter:authtoken admin_password
     inicomment $CINDER_API_PASTE_INI filter:authtoken signing_dir
 
+    SECTION=keystoneauth
+
     iniset $CINDER_CONF keystone_authtoken identity_uri $KEYSTONE_AUTH_URI
     iniset $CINDER_CONF keystone_authtoken cafile $KEYSTONE_SSL_CA
-    iniset $CINDER_CONF keystone_authtoken admin_tenant_name $SERVICE_TENANT_NAME
-    iniset $CINDER_CONF keystone_authtoken admin_user cinder
-    iniset $CINDER_CONF keystone_authtoken admin_password $SERVICE_PASSWORD
     iniset $CINDER_CONF keystone_authtoken signing_dir $CINDER_AUTH_CACHE_DIR
+
+    iniset $CINDER_CONF keystone_authtoken auth_section $SECTION
+    iniset $CINDER_CONF $SECTION auth_plugin v3password
+    iniset $CINDER_CONF $SECTION auth_url $KEYSTONE_SERVICE_URI/v3
+    iniset $CINDER_CONF $SECTION username cinder
+    iniset $CINDER_CONF $SECTION password $SERVICE_PASSWORD
+    iniset $CINDER_CONF $SECTION user_domain_id default
+    iniset $CINDER_CONF $SECTION project_name $SERVICE_TENANT_NAME
+    iniset $CINDER_CONF $SECTION project_domain_id default
 
     iniset $CINDER_CONF DEFAULT auth_strategy keystone
     iniset $CINDER_CONF DEFAULT debug $ENABLE_DEBUG_LOG_LEVEL
