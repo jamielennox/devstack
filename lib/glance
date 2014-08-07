@@ -117,8 +117,9 @@ function configure_glance {
 
     SECTION=keystoneauth
 
+    iniset $GLANCE_API_CONF keystone_authtoken auth_section $SECTION
     iniset $GLANCE_API_CONF $SECTION auth_plugin v3password
-    iniset $GLANCE_API_CONF $SECTION auth_url $KEYSTONE_AUTH_URI/v3
+    iniset $GLANCE_API_CONF $SECTION auth_url $KEYSTONE_SERVICE_URI/v3
     iniset $GLANCE_API_CONF $SECTION user_name glance
     iniset $GLANCE_API_CONF $SECTION password $SERVICE_PASSWORD
     iniset $GLANCE_API_CONF $SECTION user_domain_id default
