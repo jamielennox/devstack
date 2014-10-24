@@ -430,16 +430,22 @@ function configure_auth_token_middleware {
     local signing_dir=$3
     local section=${4:-keystone_authtoken}
 
-    iniset $conf_file $section auth_host $KEYSTONE_AUTH_HOST
-    iniset $conf_file $section auth_port $KEYSTONE_AUTH_PORT
-    iniset $conf_file $section auth_protocol $KEYSTONE_AUTH_PROTOCOL
-    iniset $conf_file $section identity_uri $KEYSTONE_AUTH_URI
+    # reported publicly as auth location on 401 erros
+    iniset $conf_file $section auth_uri $KEYSTONE_SERVICE_URI
+
+    # service user details
+    iniset $conf_file auth_plugin password
+    iniset $conf_file auth_url $KEYSTONE_AUTH_URI
+    iniset $conf_file username $admin_user
+    iniset $conf_file password $SERVICE_USER
+    iniset $conf_file user_domain_id default
+    iniset $conf_file project_name $SERVICE_TENANT_NAME
+    iniset $conf_file project_domain_id default
+
+    # SSL certificates
     iniset $conf_file $section cafile $SSL_BUNDLE_FILE
-    configure_API_version $conf_file $IDENTITY_API_VERSION $section
-    iniset $conf_file $section admin_tenant_name $SERVICE_TENANT_NAME
-    iniset $conf_file $section admin_user $admin_user
-    iniset $conf_file $section admin_password $SERVICE_PASSWORD
     iniset $conf_file $section signing_dir $signing_dir
+
     if [[ -n "$KEYSTONE_TOKEN_HASH_ALGORITHM" ]]; then
         iniset $conf_file keystone_authtoken hash_algorithms "$KEYSTONE_TOKEN_HASH_ALGORITHM"
     fi
