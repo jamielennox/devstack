@@ -297,7 +297,7 @@ function configure_keystone {
         SENDER=keystone
         RESPONSE=$(openstack --os-url $KITE_URL --os-token $ADMIN_PASSWORD key set $SENDER)
         SENDER=$SENDER:$(echo "$RESPONSE" | grep -i generation | get_field 2)
-        KEY=$(echo "$RESPONSE" | grep -i key | get_field 2)
+        KEY=$(echo "$RESPONSE" | grep -i "/\|\s+key\s+\|/" | get_field 2)
 
         iniset $KEYSTONE_CONF DEFAULT kds_url "$KITE_URL"
         iniset $KEYSTONE_CONF DEFAULT kds_sender "$SENDER"
