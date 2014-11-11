@@ -780,6 +780,13 @@ fi
 # Initialize the directory for service status check
 init_service_check
 
+# Configure database
+# ------------------
+
+if is_service_enabled $DATABASE_BACKENDS; then
+    configure_database
+fi
+
 # Check Out and Install Source
 # ----------------------------
 
@@ -975,14 +982,6 @@ restart_rpc_backend
 
 if [ -f $SSL_BUNDLE_FILE ]; then
     export OS_CACERT=$SSL_BUNDLE_FILE
-fi
-
-
-# Configure database
-# ------------------
-
-if is_service_enabled $DATABASE_BACKENDS; then
-    configure_database
 fi
 
 
