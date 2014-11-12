@@ -294,15 +294,17 @@ function configure_keystone {
 
     # encrypted messaging setup
     if is_service_enabled kite; then
-        SENDER=keystone
-        RESPONSE=$(openstack --os-url $KITE_URL --os-token $ADMIN_PASSWORD key set $SENDER)
-        SENDER=$SENDER:$(echo "$RESPONSE" | grep -i generation | get_field 2)
-        KEY=$(echo "$RESPONSE" | grep -i "/\|\s+key\s+\|/" | get_field 2)
+        # SENDER=keystone
+        # RESPONSE=$(openstack --os-url $KITE_URL --os-token $ADMIN_PASSWORD key set $SENDER)
+        # SENDER=$SENDER:$(echo "$RESPONSE" | grep -i generation | get_field 2)
+        # KEY=$(echo "$RESPONSE" | grep -i "|[[:space:]]\+key[[:space:]]\+|" | get_field 2)
 
-        iniset $KEYSTONE_CONF DEFAULT kds_url "$KITE_URL"
-        iniset $KEYSTONE_CONF DEFAULT kds_sender "$SENDER"
-        iniset $KEYSTONE_CONF DEFAULT kds_key "$KEY"
-        iniset $KEYSTONE_CONF DEFAULT rpc_protocol 'kitev1'
+        # iniset $KEYSTONE_CONF kite_plugin kds_url "$KITE_URL"
+        iniset $KEYSTONE_CONF kite_plugin sec_identity "keystone"
+        iniset $KEYSTONE_CONF kite_plugin host "127.0.0.1"
+        iniset $KEYSTONE_CONF kite_plugin port "9091"
+        # iniset $KEYSTONE_CONF kite_plugin kds_key "$KEY"
+        # iniset $KEYSTONE_CONF kite_plugin rpc_protocol 'kitev1'
     fi
 
     # Set up logging
