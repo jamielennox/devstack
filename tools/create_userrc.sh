@@ -219,6 +219,7 @@ EOF
     fi
 
     cat >>"$rcfile" <<EOF
+
 # unset any other possible auth variables so we can switch between userrc files
 unset OS_USER_ID
 unset OS_TENANT_ID
