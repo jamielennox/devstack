@@ -844,6 +844,14 @@ function get_or_create_endpoint {
     _get_or_create_endpoint_with_interface $1 internal $5 $2
 }
 
+# Get a URL from a saved endpoint
+# Usage: get_endpoint_url <service> <interface>
+function get_endpoint_url {
+    echo $(openstack endpoint list \
+            --service $1 --interface $2 \
+            -c "Service Type" -c URL | grep $1 | get_field 2)
+}
+
 
 # Package Functions
 # =================
